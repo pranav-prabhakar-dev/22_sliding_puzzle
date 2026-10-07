@@ -1,8 +1,17 @@
 import time
-from puzzle import Puzzle
+from puzzle import DIRECTION_NAMES, DIRECTIONS, Puzzle
 
 SIZES = (3, 4, 5)
 DEFAULT_SIZE = 4
+
+
+def read(prompt):
+    # Treat Ctrl+C / end of input as a request to quit instead of crashing.
+    try:
+        return input(prompt).strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return "q"
 
 
 class SlidingPuzzle:
@@ -39,7 +48,7 @@ class SlidingPuzzle:
     def ask_size(self):
         """Return a board size, or None if the player wants to quit."""
         while True:
-            choice = input(f"Board size 3, 4 or 5 [Enter = {self.size}, Q quits]: ").strip().lower()
+            choice = read(f"Board size 3, 4 or 5 [Enter = {self.size}, Q quits]: ")
             if choice == "q":
                 return None
             if choice == "":
@@ -66,9 +75,11 @@ class SlidingPuzzle:
         if self.finished:
             print("The puzzle is already solved; no more moves allowed.")
             return False
-        if not self.puzzle.move(key):
-            print("That move is not possible.")
+        tile = self.puzzle.move(key)
+        if tile is None:
+            print(f"No tile can move {DIRECTION_NAMES[key]} into the blank.")
             return False
+        print(f"Moved tile {tile} {DIRECTION_NAMES[key]}.")
         self.moves += 1
         self.total_moves += 1
         if self.puzzle.solved():
@@ -82,14 +93,15 @@ class SlidingPuzzle:
         self.session_summary()
 
     def run(self):
-        print("Sliding Puzzle — W/A/S/D moves the tile into the blank. N new board, Q quits.")
+        print("Sliding Puzzle — W/A/S/D slides a tile up/left/down/right into the blank.")
+        print("N starts a new board, Q quits.")
         size = self.ask_size()
         if size is None:
             return self.quit()
         self.new_board(size)
         while True:
             self.display()
-            key = input("> ").strip().lower()
+            key = read("> ")
             if key == "q":
                 return self.quit()
             if key == "n":
@@ -98,7 +110,7 @@ class SlidingPuzzle:
                     return self.quit()
                 self.new_board(size)
                 continue
-            if key not in "wasd":
-                print("Use W/A/S/D, N or Q.")
+            if key not in DIRECTIONS:
+                print(f"Unknown command {key!r}. Use W/A/S/D, N or Q.")
                 continue
             self.slide(key)
