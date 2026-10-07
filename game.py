@@ -93,7 +93,7 @@ class SlidingPuzzle:
         self.session_summary()
 
     def run(self):
-        print("Sliding Puzzle — W/A/S/D slides a tile up/left/down/right into the blank.")
+        print("Sliding Puzzle - W/A/S/D slides a tile up/left/down/right into the blank.")
         print("N starts a new board, Q quits.")
         size = self.ask_size()
         if size is None:
